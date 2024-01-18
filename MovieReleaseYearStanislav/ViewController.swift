@@ -42,16 +42,20 @@ struct SearchResults: Codable{
 import UIKit
 
 class ViewController: UIViewController {
-
+    
     @IBOutlet weak var releasedDateLabel: UILabel!
+    @IBOutlet weak var searchTextField: UITextField!
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        //getMovieInfo()
+        getMovieInfo()
         getMovies()
     }
-
-
+    
+    
     func getMovies(){
         
         let session = URLSession.shared
@@ -66,6 +70,14 @@ class ViewController: UIViewController {
                 if let d = data{
                     if let jsonObj = try? JSONSerialization.jsonObject(with: d, options: .allowFragments) as? NSDictionary{
                         print(jsonObj)
+                        
+                        if let searchObj = try? JSONDecoder().decode(SearchResults.self, from: d){
+                            for movie in searchObj.Search{
+                                print("\(movie.Title): \(movie.Year)")
+                            }
+                        } else{
+                            print("error decoding to movie object")
+                        }
                     }
                     
                 }
@@ -123,5 +135,42 @@ class ViewController: UIViewController {
         
         
     }
+    
+    
+    @IBAction func search(_ sender: Any) {
+        
+        if searchTextField.text != ""{
+            searchForTheMovie()
+        } else{
+            print("The movie doesn't exist!")
+        }
+    }
+    
+    func searchForTheMovie(){
+        let session = URLSession.shared
+        let movieURL = URL(string: "http://www.omdbapi.com/?i=tt3896198&apikey=cafd33a0&api&s=\(searchTextField.text!.lowercased())")
+        
+        let dataTask = session.dataTask(with: movieURL!){
+            (data: Data?, response: URLResponse?, error: Error?) in
+            
+            if let e = error{
+                print("Error: \(e)")
+            }else{
+                if let d = data {
+                    if let jsonObj = try? JSONSerialization.jsonObject(with: d, options: .allowFragments) as? NSDictionary{
+                        print(jsonObj)
+                        
+                        if let movieObj = try? JSONDecoder().decode(SearchResults.self, from: d){
+                            for movie in movieObj.Search{
+                                print("\(movie.Title): \(movie.Year)")
+                            }
+                        }
+                    }
+                }
+            }
+            
+        }
+        dataTask.resume()
+    }
+    
 }
-
