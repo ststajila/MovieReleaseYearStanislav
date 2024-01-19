@@ -59,6 +59,7 @@
                     </view>
                     <connections>
                         <outlet property="releasedDateLabel" destination="VHw-0X-d5t" id="EPo-8L-mGb"/>
+                        <outlet property="searchResultsTextBox" destination="3Gf-Ov-UpW" id="jKT-V5-1Qu"/>
                         <outlet property="searchTextField" destination="MUh-uz-dHF" id="Rtg-0l-GL2"/>
                     </connections>
                 </viewController>

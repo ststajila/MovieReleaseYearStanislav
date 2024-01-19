@@ -38,13 +38,14 @@ struct SearchResults: Codable{
     var Search: [MovieSearch]
 }
 
-
 import UIKit
 
 class ViewController: UIViewController {
     
     @IBOutlet weak var releasedDateLabel: UILabel!
     @IBOutlet weak var searchTextField: UITextField!
+    
+    @IBOutlet weak var searchResultsTextBox: UITextView!
     
     
     
@@ -138,11 +139,12 @@ class ViewController: UIViewController {
     
     
     @IBAction func search(_ sender: Any) {
-        
+        searchResultsTextBox.text = ""
         if searchTextField.text != ""{
             searchForTheMovie()
         } else{
-            print("The movie doesn't exist!")
+            searchResultsTextBox.textColor = UIColor.red
+            searchResultsTextBox.text = "Type something to search!"
         }
     }
     
@@ -159,18 +161,45 @@ class ViewController: UIViewController {
                 if let d = data {
                     if let jsonObj = try? JSONSerialization.jsonObject(with: d, options: .allowFragments) as? NSDictionary{
                         print(jsonObj)
-                        
-                        if let movieObj = try? JSONDecoder().decode(SearchResults.self, from: d){
-                            for movie in movieObj.Search{
-                                print("\(movie.Title): \(movie.Year)")
+                        if let response = jsonObj.value(forKey: "Response") as? String{
+                            if response == "True"{
+                                if let movieObj = try? JSONDecoder().decode(SearchResults.self, from: d){
+                                    var res = ""
+                                    for movie in movieObj.Search{
+                                        if movie.Title.lowercased() == self.searchTextField.text!.lowercased() {
+                                             res = "\(movie.Title): \(movie.Year)\n"
+                                            break
+                                        }
+
+                                    }
+                                    
+                                    DispatchQueue.main.async{
+                                        if res == ""{
+                                            self.searchResultsTextBox.textColor = UIColor.red
+                                            self.searchResultsTextBox.text = "No movie found!"
+                                        } else{
+                                            self.searchResultsTextBox.textColor = UIColor.black
+                                            self.searchResultsTextBox.text = res
+                                        }
+                                    }
+                                    
+                                    }
+                                }
+                            } else{
+                                DispatchQueue.main.async{
+                                    if let error = jsonObj.value(forKey: "Error") as? String{
+                                        DispatchQueue.main.async{
+                                            self.searchResultsTextBox.textColor = UIColor.red
+                                            self.searchResultsTextBox.text += error
+                                        }
+                                    }
+                                }
                             }
                         }
+                        
                     }
                 }
             }
-            
-        }
         dataTask.resume()
+        }
     }
-    
-}
