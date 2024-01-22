@@ -52,8 +52,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        getMovieInfo()
-        getMovies()
+//        getMovieInfo()
+//        getMovies()
     }
     
     
@@ -150,7 +150,7 @@ class ViewController: UIViewController {
     
     func searchForTheMovie(){
         let session = URLSession.shared
-        let movieURL = URL(string: "http://www.omdbapi.com/?i=tt3896198&apikey=cafd33a0&api&s=\(searchTextField.text!.lowercased())")
+        let movieURL = URL(string: "http://www.omdbapi.com/?i=tt3896198&apikey=cafd33a0&api&t=\(searchTextField.text!.lowercased())")
         
         let dataTask = session.dataTask(with: movieURL!){
             (data: Data?, response: URLResponse?, error: Error?) in
@@ -164,42 +164,29 @@ class ViewController: UIViewController {
                         if let response = jsonObj.value(forKey: "Response") as? String{
                             if response == "True"{
                                 if let movieObj = try? JSONDecoder().decode(SearchResults.self, from: d){
-                                    var res = ""
                                     for movie in movieObj.Search{
-                                        if movie.Title.lowercased() == self.searchTextField.text!.lowercased() {
-                                             res = "\(movie.Title): \(movie.Year)\n"
-                                            break
-                                        }
-
-                                    }
-                                    
-                                    DispatchQueue.main.async{
-                                        if res == ""{
-                                            self.searchResultsTextBox.textColor = UIColor.red
-                                            self.searchResultsTextBox.text = "No movie found!"
-                                        } else{
+                                        DispatchQueue.main.async{
                                             self.searchResultsTextBox.textColor = UIColor.black
-                                            self.searchResultsTextBox.text = res
+                                            self.searchResultsTextBox.text = "\(movie.Title): \(movie.Year)"
+                                            
                                         }
-                                    }
-                                    
+                                        
                                     }
                                 }
-                            } else{
-                                DispatchQueue.main.async{
-                                    if let error = jsonObj.value(forKey: "Error") as? String{
-                                        DispatchQueue.main.async{
-                                            self.searchResultsTextBox.textColor = UIColor.red
-                                            self.searchResultsTextBox.text += error
-                                        }
+                            }
+                            else{
+                                if let error = jsonObj.value(forKey: "Error") as? String{
+                                    DispatchQueue.main.async{
+                                        self.searchResultsTextBox.textColor = UIColor.red
+                                        self.searchResultsTextBox.text = "\(error)"
                                     }
                                 }
                             }
                         }
-                        
                     }
                 }
             }
-        dataTask.resume()
         }
+        dataTask.resume()
+    }
     }
