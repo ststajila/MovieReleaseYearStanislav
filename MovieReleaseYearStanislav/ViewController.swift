@@ -52,8 +52,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-//        getMovieInfo()
-//        getMovies()
+            getMovieInfo()
+            getMovies()
     }
     
     
@@ -139,7 +139,6 @@ class ViewController: UIViewController {
     
     
     @IBAction func search(_ sender: Any) {
-        searchResultsTextBox.text = ""
         if searchTextField.text != ""{
             searchForTheMovie()
         } else{
@@ -163,11 +162,11 @@ class ViewController: UIViewController {
                         print(jsonObj)
                         if let response = jsonObj.value(forKey: "Response") as? String{
                             if response == "True"{
-                                if let movieObj = try? JSONDecoder().decode(SearchResults.self, from: d){
-                                    for movie in movieObj.Search{
-                                        DispatchQueue.main.async{
+                                if let title = jsonObj.value(forKey: "Title") as? String{
+                                    if let year = jsonObj.value(forKey: "Year") as? String{
+                                DispatchQueue.main.async{
                                             self.searchResultsTextBox.textColor = UIColor.black
-                                            self.searchResultsTextBox.text = "\(movie.Title): \(movie.Year)"
+                                            self.searchResultsTextBox.text = "\(title): \(year)"
                                             
                                         }
                                         
